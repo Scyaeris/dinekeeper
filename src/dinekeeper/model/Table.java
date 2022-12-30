@@ -1,5 +1,4 @@
 package dinekeeper.model;
-import java.util.Date;
 public class Table implements Comparable<Table> {
     /** Unique identifier for the table. */
     private final int id;

@@ -4,7 +4,6 @@ import dinekeeper.model.Reservation;
 import dinekeeper.model.Table;
 import java.util.ArrayList;
 import org.joda.time.Interval;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,35 +12,40 @@ import java.util.Map;
  * When a reservation is fulfilled (serviced), the entry is removed from the database.
  * Invariant: there can be no duplicate reservations. */
 public class ReservationData {
-    private static Map<Reservation, Table> reservations = new HashMap<>();
+    private Map<Reservation, Table> reservations;
+    private RestaurantData restaurant;
+
+    public ReservationData(RestaurantData r) {
+        restaurant = r;
+    }
 
     /* observers */
-    public static List<Table> getReservedTables() {
+    public List<Table> getReservedTables() {
         return new ArrayList(reservations.values());
     }
 
-    public static List<Reservation> getReservations() {
+    public List<Reservation> getReservations() {
         return new ArrayList<>(reservations.keySet());
     }
 
     /* mutators */
-    public static void insert(Reservation r, int tableId) {
-        reservations.put(r, RestaurantData.getTable(tableId));
+    public void insert(Reservation r, int tableId) {
+        reservations.put(r, restaurant.getTable(tableId));
     }
 
-    public static void remove(Reservation r) {
+    public void remove(Reservation r) {
         reservations.remove(r);
     }
 
-    public static Table getReservationTable(Reservation r) {
+    public Table getReservationTable(Reservation r) {
         return reservations.get(r);
     }
 
     /** Check if a table is reserved at a particular timeslot. Returns true if reserved.
      * Requires: t is a valid table
      * */
-    public static boolean isTableReserved(int tableId, Interval timeInterval) {
-        Table t = RestaurantData.getTable(tableId);
+    public boolean isTableReserved(int tableId, Interval timeInterval) {
+        Table t = restaurant.getTable(tableId);
         //all reservations for the table
         ArrayList<Reservation> reservationsAtTable = new ArrayList<>();
         for (Map.Entry<Reservation, Table> set : reservations.entrySet()) {

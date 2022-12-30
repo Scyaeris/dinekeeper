@@ -1,6 +1,7 @@
 package dinekeeper.model.data;
 
 import dinekeeper.model.Reservation;
+import java.util.HashMap;
 import java.util.Map;
 import org.joda.time.DateTime;
 
@@ -8,19 +9,23 @@ import org.joda.time.DateTime;
  * Invariant: reservations are appended in sorted order based on chronological start time,
  * Fulfilled reservations in the legacy database cannot be removed.
  * */
-public class PastReservationsData {
-    private static Map<Reservation, Double> pastReservations;
-    private static int size;
+public class PastReservationData {
+    private Map<Reservation, Double> pastReservations;
+    private int size;
 
-    public static int getSize() {
+    public PastReservationData() {
+        pastReservations = new HashMap<>();
+    }
+
+    public int getSize() {
         return size;
     }
-    public static void insert(Reservation r, double bill) {
+    public void insert(Reservation r, double bill) {
         pastReservations.put(r, bill);
         size++;
     }
 
-    public static int calculateEarnings(DateTime startDate, DateTime endDate) {
+    public int calculateEarnings(DateTime startDate, DateTime endDate) {
         //find first reservation with start time after startDate
         //find last reservation with end time before endDate
         int earnings = 0;

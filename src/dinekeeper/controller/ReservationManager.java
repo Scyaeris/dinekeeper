@@ -2,15 +2,29 @@ package dinekeeper.controller;
 
 import dinekeeper.model.Reservation;
 import dinekeeper.model.Table;
-import dinekeeper.model.data.PastReservationsData;
+import dinekeeper.model.data.PastReservationData;
 import dinekeeper.model.data.ReservationData;
 import dinekeeper.model.data.RestaurantData;
 import dinekeeper.util.InvalidTableAssignmentException;
+import dinekeeper.view.CalendarView;
+import java.util.Calendar;
 import java.util.TreeSet;
 import org.joda.time.DateTime;
 
+/** A controller that manages usage and storage in the list of upcoming reservations. */
 public class ReservationManager {
     //modifies reservations in reservationdata
+    ReservationData reservations;
+    PastReservationData pastReservations;
+    private RestaurantData restaurant;
+    CalendarView view;
+
+    public ReservationManager(CalendarView v, RestaurantData restaurant) {
+        reservations = new ReservationData(restaurant);
+        pastReservations = new PastReservationData();
+        this.restaurant = restaurant;
+        this.view = v;
+    }
 
     public void makeReservation(Reservation r) {
         assignTable(r);
@@ -19,7 +33,7 @@ public class ReservationManager {
 
     /** Cancel an upcoming reservation (r cannot be ) */
     public void cancelReservation(Reservation r) {
-        ReservationData.remove(r);
+        reservations.remove(r);
     }
 
     public void changeGuests(Reservation r, int newGuests) {
@@ -48,12 +62,12 @@ public class ReservationManager {
      * */
     public void assignTable(Reservation r, int id) {
         try {
-            Table t = RestaurantData.getTable(id);
+            Table t = restaurant.getTable(id);
             if (t == null || !t.getAvailability() || t.getOccupancy() < r.getGuests() ||
-                    ReservationData.isTableReserved(id, r.getReservationInterval())) {
+                    reservations.isTableReserved(id, r.getReservationInterval())) {
                 throw new InvalidTableAssignmentException();
             }
-            ReservationData.insert(r, id);
+            reservations.insert(r, id);
         } catch (Exception e) {
             //TODO HANDLE
         }
@@ -62,15 +76,22 @@ public class ReservationManager {
     private void autoAssign(Reservation r) {
         // query table with the least seats larger than r.occupancy
         // add to reservation data
-        TreeSet<Table> tables = RestaurantData.getAvailableTables();
+        TreeSet<Table> tables = restaurant.getAvailableTables();
         Table temp = new Table(0, r.getGuests());
-        ReservationData.insert(r, tables.ceiling(temp).getId());
+        reservations.insert(r, tables.ceiling(temp).getId());
     }
 
     public void service(Reservation r, double bill) {
         r.service();
-        PastReservationsData.insert(r, bill);
-        ReservationData.remove(r);
+        pastReservations.insert(r, bill);
+        reservations.remove(r);
 
     }
+
+    public double calculateEarnings(DateTime start, DateTime end) {
+        return pastReservations.calculateEarnings(start, end);
+    }
+
+    //gui listeners
+
 }
