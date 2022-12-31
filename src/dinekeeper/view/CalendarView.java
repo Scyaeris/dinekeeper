@@ -59,8 +59,10 @@ public class CalendarView extends JPanel {
         table = new JTable(this.dtm);
         table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         pane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setPreferredSize(new Dimension(700, 300));
         JScrollBar bar = pane.getVerticalScrollBar();
         bar.setPreferredSize(new Dimension(40, 0));
         add(pane);
+        TableColumnManager tcm = new TableColumnManager(table);
     }
 }

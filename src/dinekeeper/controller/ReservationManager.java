@@ -8,6 +8,8 @@ import dinekeeper.model.data.RestaurantData;
 import dinekeeper.util.InvalidReservationException;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.view.CalendarView;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -23,13 +25,19 @@ import org.joda.time.format.DateTimeFormatter;
 /** A controller that manages usage and storage in the list of upcoming reservations. */
 public class ReservationManager {
     //modifies reservations in reservationdata
-    ReservationData reservations;
-    PastReservationData pastReservations;
+    private ReservationData reservations;
+    private PastReservationData pastReservations;
     private RestaurantData restaurant;
-    CalendarView view;
+    private CalendarView view;
     DefaultTableModel dtm = new DefaultTableModel(null,
-            new String[]{"Name", "Phone", "Guests", "Time", "Duration", "Accessibility", "Misc", "Table"});
-
+            new String[]{"Name", "Phone", "Guests", "Time", "Duration", "Accessibility", "Misc", "Table"}) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return (column != 0 && column != 7);
+        }
+    };
+    /** Stores the names of each reservation for faster lookup/table updates. Indices are rows. */
+    private LinkedList<String> names = new LinkedList<>();
     public ReservationManager(CalendarView v, RestaurantData restaurant) {
         reservations = new ReservationData(restaurant);
         pastReservations = new PastReservationData();
@@ -41,40 +49,48 @@ public class ReservationManager {
     }
 
     public void makeReservation(Reservation r) {
-        //TODO prompt if user wants to manually reserve
         int manualAssign = JOptionPane.showOptionDialog(null, "Automatically assign table?", "Table Assignment"
                 , JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Yes", "No"}, "Yes");
-        if (manualAssign == 1) {
-            int tableNo = Integer.parseInt(
-                    JOptionPane.showInputDialog("Table Id to Assign: "));
-            assignTable(r, tableNo);
-        } else {
-            autoAssign(r);
+        try {
+            if (manualAssign == 1) {
+                int tableNo = Integer.parseInt(
+                        JOptionPane.showInputDialog("Table Id to Assign: "));
+                assignTable(r, tableNo);
+            } else {
+                autoAssign(r);
+            }
+        } catch (InvalidReservationException e) {
+            //TODO ERROR DIALOG
         }
+        names.add(r.getName());
     }
 
-    /** Remove a reservation, either due to cancelling or completion. */
-    public void removeReservation(Reservation r) {
-        reservations.remove(r);
-        //dtm.removeRow(); TODO
+    /** Remove a reservation under the name n, either due to cancelling or completion. */
+    public void removeReservation(String n) throws InvalidReservationException {
+        reservations.remove(reservations.getByName(n));
+        dtm.removeRow(names.indexOf(n));
+        names.remove(n);
     }
 
-    public void changeGuests(Reservation r, int newGuests) {
-        removeReservation(r);
-        r.changeGuests(newGuests);
-        makeReservation(r);
+    private void changeGuests(String n, int newGuests) throws InvalidReservationException {
+        Reservation newR = reservations.getByName(n);
+        newR.changeGuests(newGuests);
+        removeReservation(n);
+        makeReservation(newR);
     }
 
-    public void changeTime(Reservation r, DateTime newTime, int newDuration) {
-        removeReservation(r);
-        r.changeTime(newTime, newDuration);
-        makeReservation(r);
+    private void changeTime(String n, DateTime newTime, int newDuration)
+            throws InvalidReservationException {
+        Reservation newR = reservations.getByName(n);
+        newR.changeTime(newTime, newDuration);
+        removeReservation(n);
+        makeReservation(newR);
     }
 
     /** Automatically assigns a given reservation r to an available table in the restaurant.
      * Postcondition: r and a table with the lowest >= occupancy will be added to ReservationData.
      * */
-    private void autoAssign(Reservation r) {
+    private void autoAssign(Reservation r) throws InvalidReservationException {
         // query table with the least seats larger than r.occupancy
         // add to reservation data
         TreeSet<Table> tables = restaurant.getAvailableTables();
@@ -97,7 +113,7 @@ public class ReservationManager {
      *      *           Checks: id of table is valid and is available and not occupied,
      *                  has occupancy >= number of guests in reservation.
      * */
-    private void assignTable(Reservation r, int id) {
+    private void assignTable(Reservation r, int id) throws InvalidReservationException {
         try {
             Table t = restaurant.getTable(id);
             if (t == null || !t.getAvailability() || t.getOccupancy() < r.getGuests() ||
@@ -111,10 +127,11 @@ public class ReservationManager {
         }
     }
 
-    public void service(Reservation r, double bill) {
+    public void service(Reservation r, double bill) throws InvalidReservationException {
         r.service();
         pastReservations.insert(r, bill);
-        reservations.remove(r);
+        removeReservation(r.getName());
+
 
     }
 
@@ -142,14 +159,35 @@ public class ReservationManager {
         view.addTableListener(e -> {
         if (e.getType() == TableModelEvent.UPDATE) {
             String name = (String) dtm.getValueAt(e.getFirstRow(), 0);
-            String col = String.valueOf(e.getColumn());
+            int col = e.getColumn();
             String update = String.valueOf(dtm.getValueAt(e.getFirstRow(), e.getColumn()));
-            if (col.equals("Phone")) {
-                try {
-                    reservations.getByName(name).changePhone(update);
-                } catch (InvalidReservationException ex) {
-                    throw new RuntimeException(ex);
+            DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/yyyy");
+            try {
+                Reservation r = reservations.getByName(name);
+                switch (col) {
+                    case 1: //phone
+                        r.changePhone(update);
+                        break;
+                    case 2: //guests: reassign reservation
+                        changeGuests(name, Integer.parseInt(update));
+                        break;
+                    case 3: //time: reassign reservation
+                        String d = String.valueOf(dtm.getValueAt(e.getFirstRow(), col + 1));
+                        int dur = Integer.parseInt(d);
+                        changeTime(name, dtf.parseDateTime(update), dur);
+                        break;
+                    case 4: //duration: reassign reservation
+                        changeTime(name, r.getStartTime(), Integer.parseInt(update));
+                        break;
+                    case 5: //accessibility
+                        r.changeAccessibility(update);
+                        break;
+                    case 6: //misc
+                        r.changeMisc(update);
+                        break;
                 }
+            } catch (InvalidReservationException ex) {
+                JOptionPane.showMessageDialog(null, "Update error: Reservation not found. ", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         });
@@ -159,14 +197,16 @@ public class ReservationManager {
                 try {
                     double bill = Double.parseDouble(JOptionPane.showInputDialog("Total bill: "));
                     service(reservations.getByName((String) dtm.getValueAt(row, 0)), bill);
-                } catch (InvalidReservationException ex) {}
+                } catch (InvalidReservationException ex) {
+
+                }
             }
         });
 
         view.addRemoveListener(e -> {
             String n = JOptionPane.showInputDialog("Name: ");
             try {
-                removeReservation(reservations.getByName(n));
+                removeReservation(n);
             } catch (InvalidReservationException ex) {
                 JOptionPane.showMessageDialog(null, "Reservation not found. ", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -199,7 +239,6 @@ public class ReservationManager {
                 DateTime rStart = dtf.parseDateTime(startTime.getText());
                 Optional<String> dur = Optional.ofNullable(duration.getText()).filter(Predicate.not(String::isEmpty));
                 int rDuration = Integer.parseInt((dur.orElse("60")));
-                //Interval rInterval = new Interval(rStart, rStart.plusMinutes(rDuration.orElse(60)));
                 String rAcc = accessibility.getText();
                 String rMisc = misc.getText();
 

@@ -90,4 +90,11 @@ public class Reservation {
         isServiced = true;
     }
 
+    public void changeAccessibility(String acc) {
+        this.accessibility = Optional.of(acc);
+    }
+
+    public void changeMisc(String misc) {
+        this.misc = Optional.of(misc);
+    }
 }

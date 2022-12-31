@@ -2,8 +2,11 @@ package dinekeeper.controller;
 
 import dinekeeper.model.Table;
 import dinekeeper.model.data.RestaurantData;
+import dinekeeper.util.InvalidTableAssignmentException;
+import dinekeeper.util.InvalidTableUpdateException;
 import dinekeeper.view.TableView;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -12,11 +15,17 @@ import javax.swing.table.DefaultTableModel;
 public class RestaurantManager {
     private RestaurantData restaurant;
     private TableView view;
-    private Map<Integer, Integer> idRowMap = new HashMap<>();
-    private static int nextRow = 0;
+
+    /** Stores the ID of each table for faster lookup/table updates. Indices are rows. */
+    private LinkedList<Integer> ids = new LinkedList<>();
 
     private DefaultTableModel dtm = new DefaultTableModel(null,
-            new String[]{"ID", "Occupancy", "Availability"});
+            new String[]{"ID", "Occupancy", "Availability"}) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return column == 1;
+        }
+    };
 
 
     public RestaurantManager(TableView v, RestaurantData restaurant) {
@@ -32,23 +41,33 @@ public class RestaurantManager {
         Map<Integer, Table> map = restaurant.getTables();
         for (Map.Entry<Integer, Table> set : map.entrySet()) {
             dtm.addRow(new Object[]{set.getKey(), set.getValue().getOccupancy(), set.getValue().getAvailability()});
-            idRowMap.put(set.getKey(), nextRow++);
+            ids.add(set.getKey());
         }
     }
 
     public void insertTable(int id, int occupancy) {
         Table t = new Table(id, occupancy);
-        restaurant.insert(t);
+        try {
+            restaurant.insert(t);
+        } catch (InvalidTableAssignmentException e) {
+            //TODO DIALOG HANDLE EXCEPTION
+            System.out.println("exc");
+        }
         //update table view
         dtm.addRow(new Object[]{id, occupancy, Boolean.TRUE});
-        idRowMap.put(id, nextRow++);
+        ids.add(id);
     }
 
     public void removeTable(int id) {
-        restaurant.remove(id);
+        try {
+            restaurant.remove(id);
+        } catch (InvalidTableUpdateException e) {
+            //TODO DIALOG HANDLE EXCEPTION
+            System.out.println("exc");
+        }
         //update table view
-        dtm.removeRow(idRowMap.get(id));
-        nextRow--;
+        dtm.removeRow(ids.indexOf(id));
+        ids.remove(ids.indexOf(id));
     }
 
     public void changeAvailability(int id, int row) {

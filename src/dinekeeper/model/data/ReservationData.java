@@ -12,7 +12,8 @@ import java.util.Map;
 /** Mutable database containing all the confirmed upcoming reservations.
  * Each reservation is assigned with a table with an occupancy >= number of guests.
  * When a reservation is fulfilled (serviced), the entry is removed from the database.
- * Invariant: there can be no duplicate reservations. */
+ * Invariant: there can be no duplicate reservations, and only one reservation can be made
+ * under one name before it being serviced. */
 public class ReservationData {
     private Map<Reservation, Table> reservations = new HashMap<>();
     private RestaurantData restaurant;
@@ -31,11 +32,17 @@ public class ReservationData {
     }
 
     /* mutators */
-    public void insert(Reservation r, int tableId) {
+    /** TODO Checks: name is not already with a reservation.*/
+    public void insert(Reservation r, int tableId) throws InvalidReservationException {
+        for (Reservation res : reservations.keySet()) {
+            if (res.getName().equals(r.getName())) throw new InvalidReservationException();
+        }
         reservations.put(r, restaurant.getTable(tableId));
     }
 
-    public void remove(Reservation r) {
+    /** TODO Checks: reservation exists. */
+    public void remove(Reservation r) throws InvalidReservationException {
+        if (reservations.get(r) == null) throw new InvalidReservationException();
         reservations.remove(r);
     }
 
