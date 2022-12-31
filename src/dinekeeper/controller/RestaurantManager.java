@@ -27,7 +27,7 @@ public class RestaurantManager {
         view.createTable(dtm);
     }
 
-    /** Formats and returns restaurant data in 2D array form. */
+    /** Formats restaurant data into tabular form for GUI. */
     private void initializeTableView() {
         Map<Integer, Table> map = restaurant.getTables();
         for (Map.Entry<Integer, Table> set : map.entrySet()) {

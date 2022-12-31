@@ -1,5 +1,6 @@
 package dinekeeper.model;
 import java.util.Optional;
+import java.util.function.Predicate;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 public class Reservation {
@@ -18,14 +19,7 @@ public class Reservation {
     /** Used to be checked off if reservation has been fulfilled by the restaurant. */
     private boolean isServiced = false;
 
-    /** Creates a 1-hour reservation request at startTime with no additional information. */
-    public Reservation(DateTime startTime, String name, String phone, int guests) {
-        this.reservationInterval = new Interval(startTime, startTime.plusMinutes(60));
-        //this.endTime = startTime;
-        this.name = name;
-        this.phone = phone;
-        this.guests = guests;
-    }
+    private int duration = 60;
 
     /** Creates a custom reservation with custom information.
      * @param duration length of the reservation, in minutes.
@@ -35,11 +29,28 @@ public class Reservation {
         this.name = name;
         this.phone = phone;
         this.guests = guests;
-        this.accessibility = Optional.of(accessibility);
-        this.misc = Optional.of(misc);
+        this.accessibility = Optional.ofNullable(accessibility).filter(Predicate.not(String::isEmpty));
+        this.misc = Optional.ofNullable(misc).filter(Predicate.not(String::isEmpty));
+        this.duration = duration;
     }
 
     /* Observers */
+    public String getName() {
+        return name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public DateTime getStartTime() {
+        //TODO Format
+        return reservationInterval.getStart();
+    }
+
+    public int getDuration() {
+        return duration;
+    }
     public int getGuests() {
         return guests;
     }
@@ -47,6 +58,16 @@ public class Reservation {
     public Interval getReservationInterval() {
         return reservationInterval;
     }
+
+    public String getAccessibility() {
+        return accessibility.orElse("N/A");
+    }
+
+    public String getMisc() {
+        return misc.orElse("N/A");
+    }
+
+    public boolean getServiceStatus() {return isServiced;}
 
     /* Mutators (to be used in controller.AvailabilityManager)*/
     public void changeName(String name) {

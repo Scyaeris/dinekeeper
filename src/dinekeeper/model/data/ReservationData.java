@@ -2,7 +2,9 @@ package dinekeeper.model.data;
 
 import dinekeeper.model.Reservation;
 import dinekeeper.model.Table;
+import dinekeeper.util.InvalidReservationException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.joda.time.Interval;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,7 @@ import java.util.Map;
  * When a reservation is fulfilled (serviced), the entry is removed from the database.
  * Invariant: there can be no duplicate reservations. */
 public class ReservationData {
-    private Map<Reservation, Table> reservations;
+    private Map<Reservation, Table> reservations = new HashMap<>();
     private RestaurantData restaurant;
 
     public ReservationData(RestaurantData r) {
@@ -24,8 +26,8 @@ public class ReservationData {
         return new ArrayList(reservations.values());
     }
 
-    public List<Reservation> getReservations() {
-        return new ArrayList<>(reservations.keySet());
+    public Map<Reservation, Table> getReservations() {
+        return reservations;
     }
 
     /* mutators */
@@ -57,5 +59,14 @@ public class ReservationData {
             if (r.getReservationInterval().overlaps(timeInterval)) return true;
         }
         return false;
+    }
+
+    //TODO change to use data structure for O(1) or O(lgn) complexity
+    public Reservation getByName(String name) throws InvalidReservationException {
+        for (Reservation r : reservations.keySet()) {
+            if (r.getName().equals(name)) return r;
+        }
+        throw new InvalidReservationException();
+
     }
 }
