@@ -9,13 +9,13 @@ import dinekeeper.view.CalendarView;
 import dinekeeper.view.LedgerView;
 import dinekeeper.view.TableView;
 import java.awt.Dimension;
-import java.awt.event.KeyEvent;
-import java.sql.SQLOutput;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
 public class App {
     /**  */
@@ -25,9 +25,9 @@ public class App {
 
     public static void makeApp() {
         SwingUtilities.invokeLater(() -> {
-            RestaurantData r = new RestaurantData(); //change to calling fetch data later
-            ReservationData re = new ReservationData(r); //above
-            PastReservationData pr = new PastReservationData(); //above
+            RestaurantData r = fetchSavedRestaurantData();
+            ReservationData re = fetchSavedReservationData(r);
+            PastReservationData pr = fetchSavedPastData();
 
             JFrame app = new JFrame();
             JTabbedPane pane = new JTabbedPane();
@@ -54,5 +54,46 @@ public class App {
         pane.addTab("Ledger", ledgerView);
         ReservationManager reservationManager = new ReservationManager(calendarView, ledgerView, r, re, pr);
     }
-    //get data (serialise?)
+
+    //get data
+    public static RestaurantData fetchSavedRestaurantData() {
+        try {
+            if (! new File("bin/restaurant-data.bin").exists()) return new RestaurantData();
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("bin/restaurant-data.bin"));
+            RestaurantData r = (RestaurantData) ois.readObject();
+            return r;
+        } catch (IOException e) {
+            System.err.println(e);
+            System.exit(1);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return new RestaurantData();
+    }
+
+    public static ReservationData fetchSavedReservationData(RestaurantData r) {
+        try {
+            if (! new File("bin/reservation-data.bin").exists()) return new ReservationData(r);
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("bin/reservation-data.bin"));
+            ReservationData res = (ReservationData) ois.readObject();
+            return res;
+        } catch (Exception e) {
+            System.err.println(e);
+            System.exit(1);
+        }
+        return new ReservationData(r);
+    }
+
+    public static PastReservationData fetchSavedPastData() {
+        try {
+            if (! new File("bin/past-reservation-data.bin").exists()) return new PastReservationData();
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("bin/past-reservation-data.bin"));
+            PastReservationData r = (PastReservationData) ois.readObject();
+            return r;
+        } catch (Exception e) {
+            System.err.println(e);
+            System.exit(1);
+        }
+        return new PastReservationData();
+    }
 }

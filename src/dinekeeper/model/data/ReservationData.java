@@ -3,6 +3,7 @@ package dinekeeper.model.data;
 import dinekeeper.model.Reservation;
 import dinekeeper.model.Table;
 import dinekeeper.util.InvalidReservationException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.joda.time.Interval;
@@ -14,7 +15,7 @@ import java.util.Map;
  * When a reservation is fulfilled (serviced), the entry is removed from the database.
  * Invariant: there can be no duplicate reservations, and only one reservation can be made
  * under one name before it being serviced. */
-public class ReservationData {
+public class ReservationData implements Serializable {
     private Map<Reservation, Table> reservations = new HashMap<>();
     private RestaurantData restaurant;
 

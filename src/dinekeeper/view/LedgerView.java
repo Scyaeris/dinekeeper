@@ -1,5 +1,6 @@
 package dinekeeper.view;
 
+import dinekeeper.util.TableColumnManager;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
@@ -9,11 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 public class LedgerView extends JPanel {
     private JButton calculateButton;
+    private JButton saveButton;
 
     private JLabel totalEarningsLabel;
     private JLabel calculateEarningsLabel;
@@ -26,8 +27,10 @@ public class LedgerView extends JPanel {
     public LedgerView() {
         JPanel topPanel = new JPanel();
         calculateButton = new JButton("Calculate Earnings");
+        saveButton = new JButton("Save");
         calculateEarningsLabel = new JLabel("Calculated Earnings: __");
         totalEarningsLabel = new JLabel("Total Earnings: 0");
+        topPanel.add(saveButton);
         topPanel.add(calculateButton);
         topPanel.add(calculateEarningsLabel);
         topPanel.add(totalEarningsLabel);
@@ -36,6 +39,10 @@ public class LedgerView extends JPanel {
 
     public void addCalculateListener(ActionListener l) {
         calculateButton.addActionListener(l);
+    }
+
+    public void addSaveListener(ActionListener l) {
+        saveButton.addActionListener(l);
     }
 
     public void updateCalculateLabel(double x) {

@@ -9,6 +9,9 @@ import dinekeeper.util.InvalidReservationException;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.view.CalendarView;
 import dinekeeper.view.LedgerView;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
@@ -266,15 +269,33 @@ public class ReservationManager {
                 makeReservation(r);
             }
         });
+
+        view.addSaveListener(e -> {
+            //serialise
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("bin/reservation-data.bin"));
+                oos.writeObject(reservations);
+                JOptionPane.showMessageDialog(null, "Reservations Data Saved!");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
 
     /* Ledger Controller*/
-    public double calculateEarnings(DateTime start, DateTime end) {
-        return pastReservations.calculateEarnings(start, end);
-    }
-
     public void addLedgerListeners() {
+        ledgerView.addSaveListener( e-> {
+            //serialise
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("bin/past-reservation-data.bin"));
+                oos.writeObject(pastReservations);
+                JOptionPane.showMessageDialog(null, "Ledger Data Saved!");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
         ledgerView.addCalculateListener(e -> {
             JTextField start = new JTextField();
             JTextField end = new JTextField();

@@ -3,6 +3,7 @@ package dinekeeper.model.data;
 import dinekeeper.model.Table;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.util.InvalidTableUpdateException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
@@ -12,7 +13,7 @@ import java.util.TreeSet;
  * When a reservation is fulfilled (serviced), the entry is removed from the database.
  * Invariant: there can be no duplicate reservations per table or vice versa, nor duplicate
  * table IDs. */
-public class RestaurantData {
+public class RestaurantData implements Serializable {
     private Map<Integer, Table> tables = new HashMap<>();
 
     //return sorted tables based on ascending occupancy
@@ -55,4 +56,5 @@ public class RestaurantData {
     public void changeAvailability(int id) {
         getTable(id).setAvailability(!getTable(id).getAvailability());
     }
+
 }

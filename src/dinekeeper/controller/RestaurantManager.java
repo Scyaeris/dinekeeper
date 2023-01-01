@@ -5,6 +5,11 @@ import dinekeeper.model.data.RestaurantData;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.util.InvalidTableUpdateException;
 import dinekeeper.view.TableView;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.JOptionPane;
@@ -90,6 +95,17 @@ public class RestaurantManager {
                 int id = Integer.parseInt(JOptionPane.showInputDialog("Input id: "));
                 removeTable(id);
             } catch (NumberFormatException ex) {}
+        });
+
+        view.addSaveListener(e -> {
+            //serialise
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("bin/restaurant-data.bin"));
+                oos.writeObject(restaurant);
+                JOptionPane.showMessageDialog(null, "Restaurant Data Saved!");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         view.addTableListener(e -> {

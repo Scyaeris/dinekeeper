@@ -1,5 +1,8 @@
 package dinekeeper.model;
-public class Table implements Comparable<Table> {
+
+import java.io.Serializable;
+
+public class Table implements Comparable<Table>, Serializable {
     /** Unique identifier for the table. */
     private final int id;
     private int occupancy;
