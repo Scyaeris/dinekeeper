@@ -13,9 +13,13 @@ public class jodaTest {
     DateTime dt = new DateTime();
 
     public static void main(String args[]) {
-//        DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/yyyy");
-//        DateTime time = dtf.parseDateTime("15:36 11/28/2023");
-//        System.out.println(time);
+        DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/yyyy");
+        DateTimeFormatter dtfNoHour = DateTimeFormat.forPattern("MM/dd/YYYY");
+        DateTime time = dtf.parseDateTime("15:36 11/28/2023");
+        System.out.println(time);
+
+        DateTime time1 = dtfNoHour.parseDateTime("11/28/2023");
+        System.out.println(time1);
 
         JFrame frame = new JFrame();
 // set up frame

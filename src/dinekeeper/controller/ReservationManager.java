@@ -8,7 +8,7 @@ import dinekeeper.model.data.RestaurantData;
 import dinekeeper.util.InvalidReservationException;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.view.CalendarView;
-import java.util.HashMap;
+import dinekeeper.view.LedgerView;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
@@ -24,11 +24,11 @@ import org.joda.time.format.DateTimeFormatter;
 
 /** A controller that manages usage and storage in the list of upcoming reservations. */
 public class ReservationManager {
-    //modifies reservations in reservationdata
     private ReservationData reservations;
     private PastReservationData pastReservations;
     private RestaurantData restaurant;
     private CalendarView view;
+    private LedgerView ledgerView;
     DefaultTableModel dtm = new DefaultTableModel(null,
             new String[]{"Name", "Phone", "Guests", "Time", "Duration", "Accessibility", "Misc", "Table"}) {
         @Override
@@ -36,16 +36,32 @@ public class ReservationManager {
             return (column != 0 && column != 7);
         }
     };
+
+    DefaultTableModel dtmLedger = new DefaultTableModel(null, new String[] {"Name", "Time", "Bill"}) {
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            return false;
+        }
+    };
+
     /** Stores the names of each reservation for faster lookup/table updates. Indices are rows. */
     private LinkedList<String> names = new LinkedList<>();
-    public ReservationManager(CalendarView v, RestaurantData restaurant) {
-        reservations = new ReservationData(restaurant);
-        pastReservations = new PastReservationData();
+
+    private static DateTimeFormatter dtfNoYear = DateTimeFormat.forPattern("HH:mm MM/dd");
+    private static DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/YYYY");
+    private static DateTimeFormatter dtfNoHour = DateTimeFormat.forPattern("MM/dd/YYYY");
+    public ReservationManager(CalendarView v, LedgerView lv, RestaurantData restaurant, ReservationData r, PastReservationData pr) {
+        reservations = r;
+        pastReservations = pr;
         this.restaurant = restaurant;
         this.view = v;
+        this.ledgerView = lv;
         initializeTableView();
         view.createTable(dtm);
-        addListeners();
+        initializeLedgerTableView();
+        ledgerView.createTable(dtmLedger);
+        addCalendarListeners();
+        addLedgerListeners();
     }
 
     public void makeReservation(Reservation r) {
@@ -60,7 +76,7 @@ public class ReservationManager {
                 autoAssign(r);
             }
         } catch (InvalidReservationException e) {
-            //TODO ERROR DIALOG
+            JOptionPane.showMessageDialog(null, "Reservation under name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
         }
         names.add(r.getName());
     }
@@ -131,12 +147,9 @@ public class ReservationManager {
         r.service();
         pastReservations.insert(r, bill);
         removeReservation(r.getName());
-
-
-    }
-
-    public double calculateEarnings(DateTime start, DateTime end) {
-        return pastReservations.calculateEarnings(start, end);
+        double total = pastReservations.totalEarnings();
+        ledgerView.updateTotalLabel(total);
+        dtmLedger.addRow(new Object[]{r.getName(), r.getStartTime().toString(dtfNoHour), bill});
     }
 
     /** Formats reservation data into tabular form for GUI. */
@@ -147,21 +160,27 @@ public class ReservationManager {
         }
     }
 
+    private void initializeLedgerTableView() {
+        Map<Reservation, Double> map = pastReservations.getPastReservations();
+        for (Map.Entry<Reservation, Double> set : map.entrySet()) {
+            dtm.addRow(new Object[]{set.getKey().getName(), set.getKey().getStartTime()
+                    .toString(dtfNoHour), set.getValue()});
+        }
+    }
+
     private Object[] formatRow(Reservation r, Table t) {
-        DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd");
-        String dt = r.getStartTime().toString(dtf);
+        String dt = r.getStartTime().toString(dtfNoYear);
         return new Object[] {r.getName(), r.getPhone(), r.getGuests(), dt,
                 r.getDuration(), r.getAccessibility(), r.getMisc(), t.getId()};
     }
 
     //gui listeners
-    public void addListeners() {
+    public void addCalendarListeners() {
         view.addTableListener(e -> {
         if (e.getType() == TableModelEvent.UPDATE) {
             String name = (String) dtm.getValueAt(e.getFirstRow(), 0);
             int col = e.getColumn();
             String update = String.valueOf(dtm.getValueAt(e.getFirstRow(), e.getColumn()));
-            DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/yyyy");
             try {
                 Reservation r = reservations.getByName(name);
                 switch (col) {
@@ -191,15 +210,14 @@ public class ReservationManager {
             }
         }
         });
+
         view.addServiceListener(e -> {
             int row = view.selectedRow();
             if (row != -1) {
                 try {
                     double bill = Double.parseDouble(JOptionPane.showInputDialog("Total bill: "));
                     service(reservations.getByName((String) dtm.getValueAt(row, 0)), bill);
-                } catch (InvalidReservationException ex) {
-
-                }
+                } catch (InvalidReservationException ex) {}
             }
         });
 
@@ -235,7 +253,6 @@ public class ReservationManager {
                 String rName = name.getText();
                 String rPhone = phone.getText();
                 int rGuests = Integer.parseInt(guests.getText());
-                DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/yyyy");
                 DateTime rStart = dtf.parseDateTime(startTime.getText());
                 Optional<String> dur = Optional.ofNullable(duration.getText()).filter(Predicate.not(String::isEmpty));
                 int rDuration = Integer.parseInt((dur.orElse("60")));
@@ -247,4 +264,28 @@ public class ReservationManager {
             }
         });
     }
+
+
+    /* Ledger Controller*/
+    public double calculateEarnings(DateTime start, DateTime end) {
+        return pastReservations.calculateEarnings(start, end);
+    }
+
+    public void addLedgerListeners() {
+        ledgerView.addCalculateListener(e -> {
+            JTextField start = new JTextField();
+            JTextField end = new JTextField();
+            Object[] message = {
+                    "Start Time", start,
+                    "End Time", end,
+            };
+            int option = JOptionPane.showConfirmDialog(null, message, "Enter in (MM/dd/YYYY)", JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION) {
+                DateTime startTime = dtfNoHour.parseDateTime(start.getText());
+                DateTime endTime = dtfNoHour.parseDateTime(end.getText());
+                ledgerView.updateCalculateLabel(pastReservations.calculateEarnings(startTime, endTime));
+            }
+        });
+    }
+
 }

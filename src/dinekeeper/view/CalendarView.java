@@ -1,5 +1,6 @@
 package dinekeeper.view;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -13,7 +14,6 @@ import javax.swing.table.DefaultTableModel;
 /** A Swing GUI showcasing the list of upcoming reservations. */
 public class CalendarView extends JPanel {
     private JButton addButton;
-    private JButton changeButton;
     private JButton removeButton;
     private JButton serviceButton;
 
@@ -23,14 +23,14 @@ public class CalendarView extends JPanel {
     private DefaultTableModel dtm;
 
     public CalendarView() {
+        JPanel buttons = new JPanel();
         addButton = new JButton("Make reservation");
         removeButton = new JButton("Remove reservation");
-        changeButton = new JButton("Change reservation");
         serviceButton = new JButton("Service");
-        add(addButton);
-        add(removeButton);
-        add(changeButton);
-        add(serviceButton);
+        buttons.add(addButton);
+        buttons.add(removeButton);
+        buttons.add(serviceButton);
+        add(buttons, BorderLayout.NORTH);
     }
 
     public void addAddListener(ActionListener l) {
@@ -62,7 +62,7 @@ public class CalendarView extends JPanel {
         pane.setPreferredSize(new Dimension(700, 300));
         JScrollBar bar = pane.getVerticalScrollBar();
         bar.setPreferredSize(new Dimension(40, 0));
-        add(pane);
+        add(pane, BorderLayout.CENTER);
         TableColumnManager tcm = new TableColumnManager(table);
     }
 }

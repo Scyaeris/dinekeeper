@@ -32,7 +32,7 @@ public class ReservationData {
     }
 
     /* mutators */
-    /** TODO Checks: name is not already with a reservation.*/
+    /** Checks: name is not already with a reservation.*/
     public void insert(Reservation r, int tableId) throws InvalidReservationException {
         for (Reservation res : reservations.keySet()) {
             if (res.getName().equals(r.getName())) throw new InvalidReservationException();
@@ -40,7 +40,7 @@ public class ReservationData {
         reservations.put(r, restaurant.getTable(tableId));
     }
 
-    /** TODO Checks: reservation exists. */
+    /** Checks: reservation exists. */
     public void remove(Reservation r) throws InvalidReservationException {
         if (reservations.get(r) == null) throw new InvalidReservationException();
         reservations.remove(r);
@@ -68,7 +68,7 @@ public class ReservationData {
         return false;
     }
 
-    //TODO change to use data structure for O(1) or O(lgn) complexity
+    //TODO change to use data structure for O(1) or O(lgn) complexity(?)
     public Reservation getByName(String name) throws InvalidReservationException {
         for (Reservation r : reservations.keySet()) {
             if (r.getName().equals(name)) return r;

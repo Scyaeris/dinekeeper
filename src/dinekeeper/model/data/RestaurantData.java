@@ -49,7 +49,7 @@ public class RestaurantData {
         return tables.get(id);
     }
 
-    public boolean checkAvailability(int id) {
-        return getTable(id).getAvailability();
+    public void changeAvailability(int id) {
+        getTable(id).setAvailability(!getTable(id).getAvailability());
     }
 }

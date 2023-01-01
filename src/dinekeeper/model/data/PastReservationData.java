@@ -17,6 +17,10 @@ public class PastReservationData {
         pastReservations = new HashMap<>();
     }
 
+    public Map<Reservation, Double> getPastReservations() {
+        return pastReservations;
+    }
+
     public int getSize() {
         return size;
     }
@@ -25,14 +29,20 @@ public class PastReservationData {
         size++;
     }
 
-    public int calculateEarnings(DateTime startDate, DateTime endDate) {
+    public double calculateEarnings(DateTime startDate, DateTime endDate) {
         //find first reservation with start time after startDate
         //find last reservation with end time before endDate
-        int earnings = 0;
+        double earnings = 0;
         for (Reservation r : pastReservations.keySet()) {
             if (r.getReservationInterval().getEnd().isAfter(startDate)) earnings += pastReservations.get(r);
             if (r.getReservationInterval().getEnd().isAfter(endDate)) break;
         }
         return earnings;
+    }
+
+    public double totalEarnings() {
+        double sum = 0;
+        for (Double d : pastReservations.values()) sum+= d;
+        return sum;
     }
 }

@@ -67,12 +67,7 @@ public class Reservation {
         return misc.orElse("N/A");
     }
 
-    public boolean getServiceStatus() {return isServiced;}
-
     /* Mutators (to be used in controller.AvailabilityManager)*/
-    public void changeName(String name) {
-        this.name = name;
-    }
 
     public void changePhone(String phone) {
         this.phone = phone;

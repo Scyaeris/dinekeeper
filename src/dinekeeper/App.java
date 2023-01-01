@@ -2,8 +2,11 @@ package dinekeeper;
 
 import dinekeeper.controller.ReservationManager;
 import dinekeeper.controller.RestaurantManager;
+import dinekeeper.model.data.PastReservationData;
+import dinekeeper.model.data.ReservationData;
 import dinekeeper.model.data.RestaurantData;
 import dinekeeper.view.CalendarView;
+import dinekeeper.view.LedgerView;
 import dinekeeper.view.TableView;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
@@ -15,16 +18,21 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 public class App {
-    /** CLI App. Maybe expand into Swing GUI later. */
+    /**  */
     public static void main(String args[]) {
+        makeApp();
+    }
+
+    public static void makeApp() {
         SwingUtilities.invokeLater(() -> {
+            RestaurantData r = new RestaurantData(); //change to calling fetch data later
+            ReservationData re = new ReservationData(r); //above
+            PastReservationData pr = new PastReservationData(); //above
+
             JFrame app = new JFrame();
             JTabbedPane pane = new JTabbedPane();
-            RestaurantData r = new RestaurantData(); //change to calling fetch data later
             startRestaurant(pane,r);
-            startCalendar(pane,r);
-            //pane.setMnemonicAt(0, KeyEvent.VK_0);
-            //pane.setMnemonicAt(0, KeyEvent.VK_1);
+            startCalendarLedger(pane, r, re, pr);
             app.add(pane);
             app.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             app.setTitle("Dinekeeper");
@@ -33,18 +41,18 @@ public class App {
         });
     }
 
-    public static void startCalendar(JTabbedPane pane, RestaurantData r) {
-        CalendarView calendarView = new CalendarView();
-        pane.addTab("Calendar", calendarView);
-
-        ReservationManager reservationManager = new ReservationManager(calendarView, r);
-    }
-
     public static void startRestaurant(JTabbedPane pane, RestaurantData r) {
         TableView tableView = new TableView();
         pane.addTab("Restaurant", tableView);
         RestaurantManager restaurantManager = new RestaurantManager(tableView, r);
     }
 
+    public static void startCalendarLedger(JTabbedPane pane, RestaurantData r, ReservationData re, PastReservationData pr) {
+        CalendarView calendarView = new CalendarView();
+        LedgerView ledgerView = new LedgerView();
+        pane.addTab("Calendar", calendarView);
+        pane.addTab("Ledger", ledgerView);
+        ReservationManager reservationManager = new ReservationManager(calendarView, ledgerView, r, re, pr);
+    }
     //get data (serialise?)
 }

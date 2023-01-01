@@ -5,10 +5,10 @@ import dinekeeper.model.data.RestaurantData;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.util.InvalidTableUpdateException;
 import dinekeeper.view.TableView;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 
 /** A controller that manages usage and storage in the tables of a restaurant. */
@@ -23,17 +23,22 @@ public class RestaurantManager {
             new String[]{"ID", "Occupancy", "Availability"}) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            return column == 1;
+            return column == 2;
+        }
+
+        @Override
+        public Class<?> getColumnClass(int col) {
+            if (col == 2) return Boolean.class;
+            return super.getColumnClass(col);
         }
     };
-
 
     public RestaurantManager(TableView v, RestaurantData restaurant) {
         this.restaurant = restaurant;
         view = v;
-        addListeners();
         initializeTableView();
         view.createTable(dtm);
+        addListeners();
     }
 
     /** Formats restaurant data into tabular form for GUI. */
@@ -49,30 +54,23 @@ public class RestaurantManager {
         Table t = new Table(id, occupancy);
         try {
             restaurant.insert(t);
+            //update table view
+            dtm.addRow(new Object[]{id, occupancy, Boolean.TRUE});
+            ids.add(id);
         } catch (InvalidTableAssignmentException e) {
-            //TODO DIALOG HANDLE EXCEPTION
-            System.out.println("exc");
+            JOptionPane.showMessageDialog(null, "Table ID " + id + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        //update table view
-        dtm.addRow(new Object[]{id, occupancy, Boolean.TRUE});
-        ids.add(id);
     }
 
     public void removeTable(int id) {
         try {
             restaurant.remove(id);
+            //update table view
+            dtm.removeRow(ids.indexOf(id));
+            ids.remove(ids.indexOf(id));
         } catch (InvalidTableUpdateException e) {
-            //TODO DIALOG HANDLE EXCEPTION
-            System.out.println("exc");
+            JOptionPane.showMessageDialog(null, "Table ID " + id + " does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        //update table view
-        dtm.removeRow(ids.indexOf(id));
-        ids.remove(ids.indexOf(id));
-    }
-
-    public void changeAvailability(int id, int row) {
-        restaurant.getTable(id).setAvailability(!restaurant.checkAvailability(id));
-        dtm.setValueAt(!(Boolean) dtm.getValueAt(row, 2), row, 2);
     }
 
     public void addListeners() {
@@ -83,17 +81,20 @@ public class RestaurantManager {
         });
 
         view.addRemoveListener(e -> {
-            int id = Integer.parseInt(JOptionPane.showInputDialog("Input id: "));
-            removeTable(id);
+            try {
+                int id = Integer.parseInt(JOptionPane.showInputDialog("Input id: "));
+                removeTable(id);
+            } catch (NumberFormatException ex) {}
         });
 
-        view.addChangeListener(e -> {
-            int row = view.selectedRow();
-            if (row != -1) {
-                changeAvailability((int) dtm.getValueAt(row, 0), row);
+        view.addTableListener(e -> {
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int id = (int) dtm.getValueAt(e.getFirstRow(), 0);
+                int col = e.getColumn();
+                if (col == 2) {
+                    restaurant.changeAvailability(id);
+                }
             }
         });
     }
-
-    //TODO: Change occupancy & availability options
 }
