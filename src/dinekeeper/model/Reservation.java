@@ -1,11 +1,10 @@
 package dinekeeper.model;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+
 public class Reservation implements Serializable {
     /** The time interval of the reservation. */
     private Interval reservationInterval;
@@ -47,7 +46,6 @@ public class Reservation implements Serializable {
     }
 
     public DateTime getStartTime() {
-        //TODO Format
         return reservationInterval.getStart();
     }
 
@@ -72,7 +70,7 @@ public class Reservation implements Serializable {
         return m.orElse("N/A");
     }
 
-    /* Mutators (to be used in controller.AvailabilityManager)*/
+    /* Mutators */
 
     public void changePhone(String phone) {
         this.phone = phone;
@@ -97,45 +95,4 @@ public class Reservation implements Serializable {
     public void changeMisc(String misc) {
         this.misc = misc;
     }
-//
-//
-//    //Proxy Serialisation
-//    private Object writeReplace() {
-//        return new SerializationProxy(this);
-//    }
-//
-//    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
-//        throw new InvalidObjectException("Proxy required.");
-//    }
-//
-//    private static class SerializationProxy implements Serializable {
-//
-//        private static final long serialVersionUID = -1L;
-//
-//        private Interval reservationInterval;
-//        private String name;
-//        private String phone;
-//        private int guests;
-//        private String accessibilityValue;
-//        private String miscValue;
-//        private boolean isServiced = false;
-//
-//        private int duration = 60;
-//
-//        public SerializationProxy(Reservation r) {
-//            reservationInterval = r.getReservationInterval();
-//            name = r.name;
-//            phone = r.phone;
-//            guests = r.guests;
-//            isServiced = r.isServiced;
-//            duration = r.duration;
-//            accessibilityValue = r.getAccessibility();
-//            miscValue = r.getMisc();
-//        }
-//
-//        private Object readResolve() {
-//            return new Reservation(reservationInterval.getStart(), duration, name, phone, guests, accessibilityValue, miscValue);
-//        }
-//
-//    }
 }

@@ -67,7 +67,6 @@ public class ReservationData implements Serializable {
         return false;
     }
 
-    //TODO change to use data structure for O(1) or O(lgn) complexity(?)
     public Reservation getByName(String name) throws InvalidReservationException {
         for (Reservation r : reservations.keySet()) {
             if (r.getName().equals(name)) return r;

@@ -5,11 +5,9 @@ import dinekeeper.model.data.RestaurantData;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.util.InvalidTableUpdateException;
 import dinekeeper.view.TableView;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.JOptionPane;
@@ -56,7 +54,8 @@ public class RestaurantManager {
         view.updateSize(restaurant.size());
     }
 
-    public void insertTable(int id, int occupancy) {
+    /** Adds a table to the restaurant data. Handles model + view. */
+    private void insertTable(int id, int occupancy) {
         Table t = new Table(id, occupancy);
         try {
             restaurant.insert(t);
@@ -69,7 +68,8 @@ public class RestaurantManager {
         }
     }
 
-    public void removeTable(int id) {
+    /** Removes a table from the restaurant data. Handles model + view. */
+    private void removeTable(int id) {
         try {
             restaurant.remove(id);
             //update table view
@@ -81,7 +81,8 @@ public class RestaurantManager {
         }
     }
 
-    public void addListeners() {
+    /* TableView GUI listeners */
+    private void addListeners() {
         view.addAddListener(e -> {
             try {
                 int id = Integer.parseInt(JOptionPane.showInputDialog("Table id: "));

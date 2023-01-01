@@ -12,6 +12,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+/** A Swing GUI tab listing all past reservations (serviced).
+ * Allows for calculating earnings between two dates. */
 public class LedgerView extends JPanel {
     private JButton calculateButton;
 

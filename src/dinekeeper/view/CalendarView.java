@@ -13,7 +13,7 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
-/** A Swing GUI showcasing the list of upcoming reservations. */
+/** A Swing GUI tab showcasing the list of upcoming reservations. */
 public class CalendarView extends JPanel {
     private JButton addButton;
     private JButton removeButton;

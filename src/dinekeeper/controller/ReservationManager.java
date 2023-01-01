@@ -46,13 +46,12 @@ public class ReservationManager {
             return false;
         }
     };
-
     /** Stores the names of each reservation for faster lookup/table updates. Indices are rows. */
     private LinkedList<String> names = new LinkedList<>();
-
     private static DateTimeFormatter dtfNoYear = DateTimeFormat.forPattern("HH:mm MM/dd");
     private static DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm MM/dd/YYYY");
     private static DateTimeFormatter dtfNoHour = DateTimeFormat.forPattern("MM/dd/YYYY");
+
     public ReservationManager(CalendarView v, LedgerView lv, RestaurantData restaurant, ReservationData r, PastReservationData pr) {
         reservations = r;
         pastReservations = pr;
@@ -67,7 +66,8 @@ public class ReservationManager {
         addLedgerListeners();
     }
 
-    public void makeReservation(Reservation r) {
+    /** Add a new reservation to the dataset. Handles both model and view actions. */
+    private void makeReservation(Reservation r) {
         int manualAssign = JOptionPane.showOptionDialog(null, "Automatically assign table?", "Table Assignment"
                 , JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Yes", "No"}, "Yes");
         try {
@@ -85,8 +85,9 @@ public class ReservationManager {
         view.updateSize(reservations.size());
     }
 
-    /** Remove a reservation under the name n, either due to cancelling or completion. */
-    public void removeReservation(String n) throws InvalidReservationException {
+    /** Remove a reservation under the name n, either due to cancelling or completion.
+     *  Handles both model and view actions.*/
+    private void removeReservation(String n) throws InvalidReservationException {
         reservations.remove(reservations.getByName(n));
         dtm.removeRow(names.indexOf(n));
         names.remove(n);
@@ -148,7 +149,9 @@ public class ReservationManager {
         }
     }
 
-    public void service(Reservation r, double bill) throws InvalidReservationException {
+    /** Handles a reservation that is finished. Adds to legacy dataset and
+     * removes from dataset of upcoming reservations. Handles model + view. */
+    private void service(Reservation r, double bill) throws InvalidReservationException {
         r.service();
         pastReservations.insert(r, bill);
         removeReservation(r.getName());
@@ -174,13 +177,14 @@ public class ReservationManager {
         }
     }
 
+    /** Helper method to format a tabled reservation for the view. */
     private Object[] formatRow(Reservation r, Table t) {
         String dt = r.getStartTime().toString(dtfNoYear);
         return new Object[] {r.getName(), r.getPhone(), r.getGuests(), dt,
                 r.getDuration(), r.getAccessibility(), r.getMisc(), t.getId()};
     }
 
-    //gui listeners
+    /* CalendarView GUI listeners */
     public void addCalendarListeners() {
         view.addTableListener(e -> {
         if (e.getType() == TableModelEvent.UPDATE) {
@@ -289,7 +293,7 @@ public class ReservationManager {
     }
 
 
-    /* Ledger Controller*/
+    /* LedgerView listeners */
     public void addLedgerListeners() {
         ledgerView.addCalculateListener(e -> {
             JTextField start = new JTextField();
