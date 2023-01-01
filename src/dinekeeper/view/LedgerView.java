@@ -1,5 +1,6 @@
 package dinekeeper.view;
 
+import dinekeeper.util.TableColumnManager;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
@@ -9,9 +10,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
+/** A Swing GUI tab listing all past reservations (serviced).
+ * Allows for calculating earnings between two dates. */
 public class LedgerView extends JPanel {
     private JButton calculateButton;
 
@@ -20,8 +22,6 @@ public class LedgerView extends JPanel {
     private JScrollPane pane;
     private JTable table;
     private DefaultTableModel dtm;
-    //TODO finish adding size label
-    private JLabel sizeLabel;
 
     public LedgerView() {
         JPanel topPanel = new JPanel();
