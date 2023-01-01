@@ -1,9 +1,11 @@
 package dinekeeper.model;
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-public class Reservation {
+
+public class Reservation implements Serializable {
     /** The time interval of the reservation. */
     private Interval reservationInterval;
     /** The name of the reserver. */
@@ -13,9 +15,9 @@ public class Reservation {
     /** The number of guests for the reservation, including the reservee. */
     private int guests;
     /** Optional information on disability accessibility, dietary restrictions, and/or allergies. */
-    private Optional<String> accessibility;
+    private String accessibility;
     /** Optional information regarding any additional requests. */
-    private Optional<String> misc;
+    private String misc;
     /** Used to be checked off if reservation has been fulfilled by the restaurant. */
     private boolean isServiced = false;
 
@@ -29,8 +31,8 @@ public class Reservation {
         this.name = name;
         this.phone = phone;
         this.guests = guests;
-        this.accessibility = Optional.ofNullable(accessibility).filter(Predicate.not(String::isEmpty));
-        this.misc = Optional.ofNullable(misc).filter(Predicate.not(String::isEmpty));
+        this.accessibility = accessibility;
+        this.misc = misc;//Optional.ofNullable(misc).filter(Predicate.not(String::isEmpty));
         this.duration = duration;
     }
 
@@ -44,7 +46,6 @@ public class Reservation {
     }
 
     public DateTime getStartTime() {
-        //TODO Format
         return reservationInterval.getStart();
     }
 
@@ -60,14 +61,16 @@ public class Reservation {
     }
 
     public String getAccessibility() {
-        return accessibility.orElse("N/A");
+        Optional<String> a = Optional.ofNullable(accessibility).filter(Predicate.not(String::isEmpty));
+        return a.orElse("N/A");
     }
 
     public String getMisc() {
-        return misc.orElse("N/A");
+        Optional<String> m = Optional.ofNullable(misc).filter(Predicate.not(String::isEmpty));
+        return m.orElse("N/A");
     }
 
-    /* Mutators (to be used in controller.AvailabilityManager)*/
+    /* Mutators */
 
     public void changePhone(String phone) {
         this.phone = phone;
@@ -86,10 +89,10 @@ public class Reservation {
     }
 
     public void changeAccessibility(String acc) {
-        this.accessibility = Optional.of(acc);
+        this.accessibility = acc;
     }
 
     public void changeMisc(String misc) {
-        this.misc = Optional.of(misc);
+        this.misc = misc;
     }
 }

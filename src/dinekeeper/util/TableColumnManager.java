@@ -1,4 +1,4 @@
-package dinekeeper.view;
+package dinekeeper.util;
 
 import java.awt.*;
 import java.beans.*;
