@@ -14,23 +14,18 @@ import javax.swing.table.DefaultTableModel;
 
 public class LedgerView extends JPanel {
     private JButton calculateButton;
-    private JButton saveButton;
 
     private JLabel totalEarningsLabel;
     private JLabel calculateEarningsLabel;
     private JScrollPane pane;
     private JTable table;
     private DefaultTableModel dtm;
-    //TODO finish adding size label
-    private JLabel sizeLabel;
 
     public LedgerView() {
         JPanel topPanel = new JPanel();
         calculateButton = new JButton("Calculate Earnings");
-        saveButton = new JButton("Save");
         calculateEarningsLabel = new JLabel("Calculated Earnings: __");
         totalEarningsLabel = new JLabel("Total Earnings: 0");
-        topPanel.add(saveButton);
         topPanel.add(calculateButton);
         topPanel.add(calculateEarningsLabel);
         topPanel.add(totalEarningsLabel);
@@ -39,10 +34,6 @@ public class LedgerView extends JPanel {
 
     public void addCalculateListener(ActionListener l) {
         calculateButton.addActionListener(l);
-    }
-
-    public void addSaveListener(ActionListener l) {
-        saveButton.addActionListener(l);
     }
 
     public void updateCalculateLabel(double x) {

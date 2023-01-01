@@ -28,9 +28,9 @@ public class TableView extends JPanel {
         removeButton = new JButton("Remove table");
         saveButton = new JButton("Save");
         sizeLabel = new JLabel("Available Tables: 0");
+        buttons.add(saveButton);
         buttons.add(addButton);
         buttons.add(removeButton);
-        buttons.add(saveButton);
         buttons.add(sizeLabel);
         add(buttons, BorderLayout.NORTH);
     }

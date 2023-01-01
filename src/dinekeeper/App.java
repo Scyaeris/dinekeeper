@@ -11,7 +11,6 @@ import dinekeeper.view.TableView;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -62,11 +61,9 @@ public class App {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("bin/restaurant-data.bin"));
             RestaurantData r = (RestaurantData) ois.readObject();
             return r;
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println(e);
             System.exit(1);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
         return new RestaurantData();
     }

@@ -169,7 +169,7 @@ public class ReservationManager {
     private void initializeLedgerTableView() {
         Map<Reservation, Double> map = pastReservations.getPastReservations();
         for (Map.Entry<Reservation, Double> set : map.entrySet()) {
-            dtm.addRow(new Object[]{set.getKey().getName(), set.getKey().getStartTime()
+            dtmLedger.addRow(new Object[]{set.getKey().getName(), set.getKey().getStartTime()
                     .toString(dtfNoHour), set.getValue()});
         }
     }
@@ -254,19 +254,23 @@ public class ReservationManager {
                     "Any additional info (Optional)", misc,
             };
             int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
-            if (option == JOptionPane.OK_OPTION)
-            {
-                String rName = name.getText();
-                String rPhone = phone.getText();
-                int rGuests = Integer.parseInt(guests.getText());
-                DateTime rStart = dtf.parseDateTime(startTime.getText());
-                Optional<String> dur = Optional.ofNullable(duration.getText()).filter(Predicate.not(String::isEmpty));
-                int rDuration = Integer.parseInt((dur.orElse("60")));
-                String rAcc = accessibility.getText();
-                String rMisc = misc.getText();
+            if (option == JOptionPane.OK_OPTION) {
+                try {
+                    String rName = name.getText();
+                    String rPhone = phone.getText();
+                    int rGuests = Integer.parseInt(guests.getText());
+                    DateTime rStart = dtf.parseDateTime(startTime.getText());
+                    Optional<String> dur = Optional.ofNullable(duration.getText()).filter(Predicate.not(String::isEmpty));
+                    int rDuration = Integer.parseInt((dur.orElse("60")));
+                    String rAcc = accessibility.getText();
+                    String rMisc = misc.getText();
 
-                Reservation r = new Reservation(rStart, rDuration, rName, rPhone, rGuests, rAcc, rMisc);
-                makeReservation(r);
+                    Reservation r = new Reservation(rStart, rDuration, rName, rPhone, rGuests, rAcc, rMisc);
+                    makeReservation(r);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, "Date/time processing error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+
+                }
             }
         });
 
@@ -275,7 +279,9 @@ public class ReservationManager {
             try {
                 ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("bin/reservation-data.bin"));
                 oos.writeObject(reservations);
-                JOptionPane.showMessageDialog(null, "Reservations Data Saved!");
+                ObjectOutputStream oos2 = new ObjectOutputStream(new FileOutputStream("bin/past-reservation-data.bin"));
+                oos2.writeObject(pastReservations);
+                JOptionPane.showMessageDialog(null, "Reservations & Ledger Data Saved!");
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -285,17 +291,6 @@ public class ReservationManager {
 
     /* Ledger Controller*/
     public void addLedgerListeners() {
-        ledgerView.addSaveListener( e-> {
-            //serialise
-            try {
-                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("bin/past-reservation-data.bin"));
-                oos.writeObject(pastReservations);
-                JOptionPane.showMessageDialog(null, "Ledger Data Saved!");
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
         ledgerView.addCalculateListener(e -> {
             JTextField start = new JTextField();
             JTextField end = new JTextField();
