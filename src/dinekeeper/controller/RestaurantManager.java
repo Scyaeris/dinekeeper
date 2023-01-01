@@ -48,6 +48,7 @@ public class RestaurantManager {
             dtm.addRow(new Object[]{set.getKey(), set.getValue().getOccupancy(), set.getValue().getAvailability()});
             ids.add(set.getKey());
         }
+        view.updateSize(restaurant.size());
     }
 
     public void insertTable(int id, int occupancy) {
@@ -57,6 +58,7 @@ public class RestaurantManager {
             //update table view
             dtm.addRow(new Object[]{id, occupancy, Boolean.TRUE});
             ids.add(id);
+            view.updateSize(restaurant.size());
         } catch (InvalidTableAssignmentException e) {
             JOptionPane.showMessageDialog(null, "Table ID " + id + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -68,6 +70,7 @@ public class RestaurantManager {
             //update table view
             dtm.removeRow(ids.indexOf(id));
             ids.remove(ids.indexOf(id));
+            view.updateSize(restaurant.size());
         } catch (InvalidTableUpdateException e) {
             JOptionPane.showMessageDialog(null, "Table ID " + id + " does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -75,9 +78,11 @@ public class RestaurantManager {
 
     public void addListeners() {
         view.addAddListener(e -> {
-            int id = Integer.parseInt(JOptionPane.showInputDialog("Table id: "));
-            int occupancy = Integer.parseInt(JOptionPane.showInputDialog("Occupancy: "));
-            insertTable(id, occupancy);
+            try {
+                int id = Integer.parseInt(JOptionPane.showInputDialog("Table id: "));
+                int occupancy = Integer.parseInt(JOptionPane.showInputDialog("Occupancy: "));
+                insertTable(id, occupancy);
+            } catch (NumberFormatException ex) {}
         });
 
         view.addRemoveListener(e -> {
@@ -93,6 +98,7 @@ public class RestaurantManager {
                 int col = e.getColumn();
                 if (col == 2) {
                     restaurant.changeAvailability(id);
+                    view.updateSize(restaurant.size());
                 }
             }
         });

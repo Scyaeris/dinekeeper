@@ -79,6 +79,7 @@ public class ReservationManager {
             JOptionPane.showMessageDialog(null, "Reservation under name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
         }
         names.add(r.getName());
+        view.updateSize(reservations.size());
     }
 
     /** Remove a reservation under the name n, either due to cancelling or completion. */
@@ -86,6 +87,7 @@ public class ReservationManager {
         reservations.remove(reservations.getByName(n));
         dtm.removeRow(names.indexOf(n));
         names.remove(n);
+        view.updateSize(reservations.size());
     }
 
     private void changeGuests(String n, int newGuests) throws InvalidReservationException {
@@ -158,6 +160,7 @@ public class ReservationManager {
         for (Map.Entry<Reservation, Table> set : map.entrySet()) {
             dtm.addRow(formatRow(set.getKey(), set.getValue()));
         }
+        view.updateSize(reservations.size());
     }
 
     private void initializeLedgerTableView() {

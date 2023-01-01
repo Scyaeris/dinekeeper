@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -17,7 +18,7 @@ public class CalendarView extends JPanel {
     private JButton removeButton;
     private JButton serviceButton;
 
-    //service
+    private JLabel sizeLabel;
     private JScrollPane pane;
     private JTable table;
     private DefaultTableModel dtm;
@@ -27,9 +28,11 @@ public class CalendarView extends JPanel {
         addButton = new JButton("Make reservation");
         removeButton = new JButton("Remove reservation");
         serviceButton = new JButton("Service");
+        sizeLabel = new JLabel("Upcoming reservations: 0");
         buttons.add(addButton);
         buttons.add(removeButton);
         buttons.add(serviceButton);
+        buttons.add(sizeLabel);
         add(buttons, BorderLayout.NORTH);
     }
 
@@ -47,6 +50,10 @@ public class CalendarView extends JPanel {
 
     public void addTableListener(TableModelListener l) {
         dtm.addTableModelListener(l);
+    }
+
+    public void updateSize(int x) {
+        sizeLabel.setText("Upcoming reservations: " + x);
     }
 
     /** Returns the selected row. Returns -1 if no row is selected. */

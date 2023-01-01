@@ -3,7 +3,6 @@ package dinekeeper.model.data;
 import dinekeeper.model.Table;
 import dinekeeper.util.InvalidTableAssignmentException;
 import dinekeeper.util.InvalidTableUpdateException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
@@ -27,6 +26,10 @@ public class RestaurantData {
         return availableTables;
     }
 
+    /** Returns the number of available tables in the restaurant. */
+    public int size() {
+        return getAvailableTables().size();
+    }
     public Map<Integer, Table> getTables() {
         return tables;
     }

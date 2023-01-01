@@ -55,7 +55,7 @@ public class LedgerView extends JPanel {
         pane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         JScrollBar bar = pane.getVerticalScrollBar();
         bar.setPreferredSize(new Dimension(40, 0));
-        add(pane, BorderLayout.CENTER);
+        add(pane, BorderLayout.SOUTH);
         TableColumnManager tcm = new TableColumnManager(table);
     }
 }

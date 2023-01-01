@@ -11,7 +11,6 @@ import org.joda.time.DateTime;
  * */
 public class PastReservationData {
     private Map<Reservation, Double> pastReservations;
-    private int size;
 
     public PastReservationData() {
         pastReservations = new HashMap<>();
@@ -20,13 +19,8 @@ public class PastReservationData {
     public Map<Reservation, Double> getPastReservations() {
         return pastReservations;
     }
-
-    public int getSize() {
-        return size;
-    }
     public void insert(Reservation r, double bill) {
         pastReservations.put(r, bill);
-        size++;
     }
 
     public double calculateEarnings(DateTime startDate, DateTime endDate) {

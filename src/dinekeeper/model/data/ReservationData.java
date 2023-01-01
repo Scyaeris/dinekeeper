@@ -31,6 +31,8 @@ public class ReservationData {
         return reservations;
     }
 
+    public int size() { return reservations.size(); }
+
     /* mutators */
     /** Checks: name is not already with a reservation.*/
     public void insert(Reservation r, int tableId) throws InvalidReservationException {
@@ -44,10 +46,6 @@ public class ReservationData {
     public void remove(Reservation r) throws InvalidReservationException {
         if (reservations.get(r) == null) throw new InvalidReservationException();
         reservations.remove(r);
-    }
-
-    public Table getReservationTable(Reservation r) {
-        return reservations.get(r);
     }
 
     /** Check if a table is reserved at a particular timeslot. Returns true if reserved.

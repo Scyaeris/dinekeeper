@@ -36,7 +36,7 @@ public class App {
             app.add(pane);
             app.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             app.setTitle("Dinekeeper");
-            app.setSize(new Dimension(800, 400)); //comment out if unneeded
+            app.setSize(new Dimension(750, 400)); //comment out if unneeded
             app.setVisible(true);
         });
     }

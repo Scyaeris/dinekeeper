@@ -4,6 +4,7 @@ package dinekeeper.view;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -14,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 public class TableView extends JPanel {
     private JButton addButton;
     private JButton removeButton;
+    private JLabel sizeLabel;
     private JScrollPane pane;
     private JTable table;
     private DefaultTableModel dtm;
@@ -22,8 +24,10 @@ public class TableView extends JPanel {
         JPanel buttons = new JPanel();
         addButton = new JButton("Add table");
         removeButton = new JButton("Remove table");
+        sizeLabel = new JLabel("Total Tables: 0");
         buttons.add(addButton);
         buttons.add(removeButton);
+        buttons.add(sizeLabel);
         add(buttons, BorderLayout.NORTH);
     }
 
@@ -39,9 +43,8 @@ public class TableView extends JPanel {
         dtm.addTableModelListener(l);
     }
 
-    /** Returns the selected row. Returns -1 if no row is selected. */
-    public int selectedRow() {
-        return table.getSelectedRow();
+    public void updateSize(int x) {
+        sizeLabel.setText("Available Tables: " + x);
     }
     public void createTable(DefaultTableModel dtm) {
         this.dtm = dtm;
